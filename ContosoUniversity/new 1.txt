@@ -1,0 +1,47 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using ScripJournal.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace ScripJournal.Pages.Scriptures
+{
+    public class IndexModel : PageModel
+    {
+        private readonly ScripJournal.Models.ScripJournalContext _context;
+
+        public IndexModel(ScripJournal.Models.ScripJournalContext context)
+        {
+            _context = context;
+        }
+
+        public IList<Scripture> Scripture { get;set; }
+        [BindProperty(SupportsGet = true)]
+        public string SearchBook { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public string SearchKeyword { get; set; }
+
+        public async Task OnGetAsync()
+        {
+
+            var scriptures = from sc in _context.Scripture
+                             select sc;
+
+            if (!string.IsNullOrEmpty(SearchBook))
+            {
+                scriptures = scriptures.Where(s => s.Book.Contains(SearchBook));
+            }
+
+            if (!string.IsNullOrEmpty(SearchKeyword))
+            {
+                scriptures = scriptures.Where(s => s.Note.Contains(SearchKeyword));
+            }
+
+            Scripture = await scriptures.ToListAsync();
+        }
+    }
+}
